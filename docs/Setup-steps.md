@@ -306,4 +306,6 @@ With all the files and dependencies in place, you are ready to run your applicat
 
 ### Step 7: View Running LLM
 
-![working screen](/docs/working-local-llm.png)
+>![Run](/docs/run.png)
+
+>![working screen](/docs/working-local-llm.png)
