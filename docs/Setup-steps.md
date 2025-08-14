@@ -52,48 +52,46 @@ Populate your files with the following code. The `index.html` file includes the 
 #### `C:\secure-web-llm\model\app.py`
 
 ```python
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 import ollama
 
 app = Flask(__name__)
-# Global list to store conversation history
 messages = [] 
 model_name = 'llama3.2' 
 
 @app.route('/')
 def index():
-    """Serves the main HTML chat page."""
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    """Handles chat messages from the user and sends them to Ollama."""
     user_message = request.json.get('message')
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
 
     messages.append({'role': 'user', 'content': user_message})
 
-    try:
-        response_stream = ollama.chat(
-            model=model_name,
-            messages=messages,
-            stream=False
-        )
-        
-        ollama_response = response_stream['message']['content']
-        messages.append({'role': 'assistant', 'content': ollama_response})
+    # The generator function will yield chunks as they arrive
+    def generate_stream():
+        full_response_content = ""
+        try:
+            stream = ollama.chat(
+                model=model_name,
+                messages=messages,
+                stream=True,  # Crucially, enable streaming
+            )
+            for chunk in stream:
+                content = chunk['message']['content']
+                if content:
+                    full_response_content += content
+                    yield content  # Yield the content chunk
+        except Exception as e:
+            yield f"Error: An unexpected error occurred: {e}"
+        finally:
+            messages.append({'role': 'assistant', 'content': full_response_content})
 
-        return jsonify({"response": ollama_response})
-
-    except ollama.ResponseError as e:
-        error_msg = f"Ollama Error: {e.error}"
-        print(error_msg)
-        return jsonify({"error": error_msg}), 500
-    except Exception as e:
-        error_msg = f"An unexpected error occurred: {e}"
-        print(error_msg)
-        return jsonify({"error": error_msg}), 500
+    # Return a streaming response
+    return Response(stream_with_context(generate_stream()), mimetype='text/plain')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
