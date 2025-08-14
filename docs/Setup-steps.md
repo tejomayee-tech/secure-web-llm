@@ -303,3 +303,7 @@ With all the files and dependencies in place, you are ready to run your applicat
     flask --app app.py run
     ```
 4.  **Open your web browser** and navigate to `http://127.0.0.1:5000`. You should see your chat application.
+
+### Step 7: View Running LLM
+
+![working screen](/docs/working-local-llm.png)
