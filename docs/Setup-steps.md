@@ -307,3 +307,11 @@ With all the files and dependencies in place, you are ready to run your applicat
 >![Run](/docs/run.png)
 
 >![working screen](/docs/working-local-llm.png)
+
+
+### Step 8: Basic check on privacy
+
+>![local-llm](/docs/test-local-llm.png)
+
+
+>![gemini](/docs/Gemini.png)
